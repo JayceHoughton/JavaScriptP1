@@ -11,6 +11,8 @@ const chalk = require('chalk')
 const boxen = require('boxen')
 const fs = require('fs')
 
+const functions = require('./functions')
+
 const styles = JSON.parse(fs.readFileSync('style.json', 'utf8'))
 
 //Asks for username and loops until username meets requirments
@@ -48,7 +50,12 @@ readLine.pause
 
 webSocket.onopen = () => {
     //Server connections message boxed in
-    console.log(boxen(`Welcome to the Server ${username}!\nAvailable Commands:\n(\\w + username): Whisper user with username.\n(\\i): Ask the server what your username is.\n(\\u): Get a list of server users.\n(\\l): Leave the server.`, {padding: 0}))
+    console.log(boxen(`Welcome to the Server ${username}!\n` +
+    `Available Commands:\n` + 
+    `(\\w + username): Whisper user with username.\n` + 
+    `(\\i): Ask the server what your username is.\n` + 
+    `(\\u): Get a list of server users.\n` + 
+    `(\\l): Leave the server.`, {padding: 0}))
     readLine.resume
     readLine.on('line', (message) => {
         //Clears readline after message is sent to get rid of clutter
@@ -114,7 +121,7 @@ webSocket.onopen = () => {
         let backMessage = JSON.parse(msg.data)
         if(backMessage.kind === "direct")
         {
-            console.log(`(Whisper From ${backMessage.from}): ${backMessage.data}`)
+            console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(backMessage.data)}`)
         }
         else if(backMessage.from === "GABServer")
         {
@@ -129,8 +136,9 @@ webSocket.onopen = () => {
         }
         else
         {
-            messageString = backMessage.from + ': ' + backMessage.data
+            messageString = "[" + backMessage.from + ']: ' + functions.styleString(backMessage.data)
             console.log(messageString)
         }
     }
 }
+
