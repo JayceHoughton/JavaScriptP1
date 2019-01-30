@@ -1,4 +1,5 @@
 [
     {"expression": "hello", "style": "green"},
-    {"expression": "hey", "style": "blue"}
+    {"expression": "hey", "style": "blue"},
+    {"expression": "what", "style": "bold"}
 ]

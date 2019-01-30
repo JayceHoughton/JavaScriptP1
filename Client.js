@@ -45,9 +45,6 @@ const readLine = readline.createInterface({
     output: process.stdout
 })
 
-//Pauses readline until we want to use it
-readLine.pause
-
 webSocket.onopen = () => {
     //Server connections message boxed in
     console.log(boxen(`Welcome to the Server ${username}!\n` +
@@ -55,8 +52,9 @@ webSocket.onopen = () => {
     `(\\w + username): Whisper user with username.\n` + 
     `(\\i): Ask the server what your username is.\n` + 
     `(\\u): Get a list of server users.\n` + 
-    `(\\l): Leave the server.`, {padding: 0}))
-    readLine.resume
+    `(\\l): Leave the server.\n` +
+    `(\\e): Emote List.`, {padding: 0}))
+
     readLine.on('line', (message) => {
         //Clears readline after message is sent to get rid of clutter
         readline.moveCursor(process.stdout, 0, -1)
@@ -69,7 +67,7 @@ webSocket.onopen = () => {
                 from: username,
                 to: whisperName[0],
                 kind: "direct",
-                data: message.substr(message.indexOf(whisperName), message.length)
+                data: functions.emoteCheck(message.substr(message.indexOf(whisperName), message.length))
             }
             console.log(`(Whispering ${whisperName[0]}): ${message.substr(message.indexOf(whisperName), message.length)}`)
             webSocket.send(JSON.stringify(messageToSend))
@@ -102,7 +100,24 @@ webSocket.onopen = () => {
             console.log(chalk.bgMagenta("Leaving server..."))
             webSocket.close()
             readLine.close
-            process.exit(1)
+            process.exit(0)
+        }
+        //Emote List command
+        else if(message.match(/^(\\e)/g))
+        {
+            console.log(boxen("Emote List: \n" +
+            ":shades1: = ( •_•)>⌐■-■\n" +
+            ":shades2: = (⌐■_■)\n" +
+            ":shades3: = ■-■¬<(•_• )\n" +
+            ":ok: = ( •_•)\n" +
+            ":no: = ಠ_ಠ\n" +
+            ":yes: = ಠ⌣ಠ\n" +
+            ":strong: = ᕙ(⇀‸↼‶)ᕗ\n" +
+            ":shrug: = ¯\\_(ツ)_/¯\n" +
+            ":flip: = (╯•□•）╯︵ ┻━┻\n" +
+            ":place: = ┬──┬ ノ( •-•ノ)\n" +
+            ":bear: = ʕ•ᴥ•ʔ\n" +
+            ":smile: = ◕‿◕", {padding: 1}))
         }
         //Default normal message to the server
         else
@@ -111,7 +126,7 @@ webSocket.onopen = () => {
                 from: username,
                 to: "all",
                 kind: "chat",
-                data: message
+                data: functions.emoteCheck(message)
             }
             webSocket.send(JSON.stringify(messageToSend))
         } 
@@ -121,7 +136,7 @@ webSocket.onopen = () => {
         let backMessage = JSON.parse(msg.data)
         if(backMessage.kind === "direct")
         {
-            console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(backMessage.data)}`)
+            console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(functions.emoteCheck(backMessage.data))}`)
         }
         else if(backMessage.from === "GABServer")
         {
@@ -136,7 +151,7 @@ webSocket.onopen = () => {
         }
         else
         {
-            messageString = "[" + backMessage.from + ']: ' + functions.styleString(backMessage.data)
+            messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
             console.log(messageString)
         }
     }
