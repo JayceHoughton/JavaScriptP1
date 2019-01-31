@@ -10,10 +10,13 @@ const readline = require('readline')
 const chalk = require('chalk')
 const boxen = require('boxen')
 const fs = require('fs')
+const figlet = require('figlet')
 
 const functions = require('./functions')
 
 const styles = JSON.parse(fs.readFileSync('style.json', 'utf8'))
+
+console.log(boxen(chalk.green("Welcome to the GAB Client!"), {padding: 1}))
 
 //Asks for username and loops until username meets requirments
 while(true) {
@@ -44,6 +47,8 @@ const readLine = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 })
+
+readLine.setPrompt("Send: ")
 
 webSocket.onopen = () => {
     //Server connections message boxed in
@@ -105,7 +110,7 @@ webSocket.onopen = () => {
         //Emote List command
         else if(message.match(/^(\\e)/g))
         {
-            console.log(boxen("Emote List: \n" +
+            console.log(boxen(chalk.green("Emote List: \n") +
             ":shades1: = ( •_•)>⌐■-■\n" +
             ":shades2: = (⌐■_■)\n" +
             ":shades3: = ■-■¬<(•_• )\n" +
@@ -136,23 +141,31 @@ webSocket.onopen = () => {
         let backMessage = JSON.parse(msg.data)
         if(backMessage.kind === "direct")
         {
+            readline.cursorTo(process.stdout, 0)
             console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(functions.emoteCheck(backMessage.data))}`)
+            readLine.prompt(true)
         }
         else if(backMessage.from === "GABServer")
         {
             if(backMessage.kind === "error")
             {
+                readline.cursorTo(process.stdout, 0)
                 console.log(chalk.bgRed(`ERROR: ${backMessage.data}`))
+                readLine.prompt(true)
             }
             else
             {
+                readline.cursorTo(process.stdout, 0)
                 console.log(chalk.bgBlue(backMessage.data))
+                readLine.prompt(true)
             }
         }
         else
         {
             messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
+            readline.cursorTo(process.stdout, 0)
             console.log(messageString)
+            readLine.prompt(true)
         }
     }
 }
