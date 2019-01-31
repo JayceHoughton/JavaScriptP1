@@ -110,6 +110,7 @@ webSocket.onopen = () => {
         //Emote List command
         else if(message.match(/^(\\e)/g))
         {
+            readline.cursorTo(process.stdout, 0)
             console.log(boxen(chalk.green("Emote List: \n") +
             ":shades1: = ( •_•)>⌐■-■\n" +
             ":shades2: = (⌐■_■)\n" +
@@ -123,6 +124,7 @@ webSocket.onopen = () => {
             ":place: = ┬──┬ ノ( •-•ノ)\n" +
             ":bear: = ʕ•ᴥ•ʔ\n" +
             ":smile: = ◕‿◕", {padding: 1}))
+            readLine.prompt(true)
         }
         //Default normal message to the server
         else
