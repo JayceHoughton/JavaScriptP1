@@ -11,6 +11,7 @@ const chalk = require('chalk')
 const boxen = require('boxen')
 const fs = require('fs')
 const figlet = require('figlet')
+const terminalkit = require('terminal-kit');
 
 const functions = require('./functions')
 
@@ -74,7 +75,9 @@ webSocket.onopen = () => {
                 kind: "direct",
                 data: functions.emoteCheck(message.substr(message.indexOf(whisperName), message.length))
             }
+            readline.cursorTo(process.stdout, 0)
             console.log(`(Whispering ${whisperName[0]}): ${message.substr(message.indexOf(whisperName), message.length)}`)
+            readLine.prompt(true)
             webSocket.send(JSON.stringify(messageToSend))
         }
         //Userlist command
@@ -140,7 +143,7 @@ webSocket.onopen = () => {
     })
 
     webSocket.onmessage = msg => {
-        let backMessage = JSON.parse(msg.data)
+        let backMessage = JSON.parse(msg.data);
         if(backMessage.kind === "direct")
         {
             readline.cursorTo(process.stdout, 0)
@@ -164,10 +167,19 @@ webSocket.onopen = () => {
         }
         else
         {
-            messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
-            readline.cursorTo(process.stdout, 0)
-            console.log(messageString)
-            readLine.prompt(true)
+            if(backMessage.data === undefined)
+            {
+                readline.cursorTo(process.stdout, 0)
+                //undefined message
+                readLine.prompt(true) 
+            }
+            else
+            {
+                messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
+                readline.cursorTo(process.stdout, 0)
+                console.log(messageString)
+                readLine.prompt(true)
+            }
         }
     }
 }
