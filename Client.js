@@ -12,8 +12,10 @@ const boxen = require('boxen')
 const fs = require('fs')
 const figlet = require('figlet')
 const terminalkit = require('terminal-kit');
+const wcwidth = require('wcwidth')
 
 const functions = require('./functions')
+const BotIt = require('./BotIt')
 
 const styles = JSON.parse(fs.readFileSync('style.json', 'utf8'))
 
@@ -59,7 +61,8 @@ webSocket.onopen = () => {
     `(\\i): Ask the server what your username is.\n` + 
     `(\\u): Get a list of server users.\n` + 
     `(\\l): Leave the server.\n` +
-    `(\\e): Emote List.`, {padding: 0}))
+    `(\\e): Emote List.\n` +
+    `(\\b): Enable BotIt.`, {padding: 0}))
 
     readLine.on('line', (message) => {
         //Clears readline after message is sent to get rid of clutter
@@ -73,10 +76,10 @@ webSocket.onopen = () => {
                 from: username,
                 to: whisperName[0],
                 kind: "direct",
-                data: functions.emoteCheck(message.substr(message.indexOf(whisperName), message.length))
+                data: functions.emoteCheck(message.substr(message.indexOf(whisperName) + whisperName[0].length, message.length))
             }
             readline.cursorTo(process.stdout, 0)
-            console.log(`(Whispering ${whisperName[0]}): ${message.substr(message.indexOf(whisperName), message.length)}`)
+            console.log(`(Whispering ${whisperName[0]}): ${message.substr(message.indexOf(whisperName) + whisperName[0].length, message.length)}`)
             readLine.prompt(true)
             webSocket.send(JSON.stringify(messageToSend))
         }
@@ -129,6 +132,10 @@ webSocket.onopen = () => {
             ":smile: = ◕‿◕", {padding: 1}))
             readLine.prompt(true)
         }
+        else if((message.match(/^(\\b)/g)))
+        {
+            BotIt.enable(ip, port)
+        }
         //Default normal message to the server
         else
         {
@@ -146,9 +153,17 @@ webSocket.onopen = () => {
         let backMessage = JSON.parse(msg.data);
         if(backMessage.kind === "direct")
         {
-            readline.cursorTo(process.stdout, 0)
-            console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(functions.emoteCheck(backMessage.data))}`)
-            readLine.prompt(true)
+            if(typeof backMessage.data === "string")
+            {
+                readline.cursorTo(process.stdout, 0)
+                console.log(`(Whisper From ${backMessage.from}): ${functions.styleString(functions.emoteCheck(backMessage.data))}`)
+                readLine.prompt(true)
+            }
+            else
+            {
+                readline.cursorTo(process.stdout, 0)
+                console.log(`(Whisper From ${backMessage.from}): ${backMessage.data}`)
+            }
         }
         else if(backMessage.from === "GABServer")
         {
@@ -161,22 +176,28 @@ webSocket.onopen = () => {
             else
             {
                 readline.cursorTo(process.stdout, 0)
+                if(wcwidth(backMessage.data) < process.stdout.columns)
+                console.log(chalk.bgBlue(backMessage.data.padEnd(process.stdout.columns - wcwidth(backMessage.data))))
+                else
                 console.log(chalk.bgBlue(backMessage.data))
                 readLine.prompt(true)
             }
         }
         else
         {
-            if(backMessage.data === undefined)
+            if(typeof backMessage.data !== "string")
             {
                 readline.cursorTo(process.stdout, 0)
-                //undefined message
+                console.log(backMessage.data)
                 readLine.prompt(true) 
             }
             else
             {
                 messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
-                readline.cursorTo(process.stdout, 0)
+                readline.cursorTo(process.stdout,0)
+                if(wcwidth(messageString) < process.stdout.columns)
+                console.log(messageString.padEnd(process.stdout.columns - wcwidth(messageString)))
+                else
                 console.log(messageString)
                 readLine.prompt(true)
             }
