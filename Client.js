@@ -1,23 +1,15 @@
-//Main file for Client
+//Main file for Client and all primary client functions. General functions are in functions.js
 
 const WebSocket = require('ws');
-const Express = require('express');
-const http = require('http');
-const url = require('url');
 
 const readlineSync = require('readline-sync')
 const readline = require('readline')
 const chalk = require('chalk')
 const boxen = require('boxen')
-const fs = require('fs')
-const figlet = require('figlet')
-const terminalkit = require('terminal-kit');
 const wcwidth = require('wcwidth')
 
 const functions = require('./functions')
 const BotIt = require('./BotIt')
-
-const styles = JSON.parse(fs.readFileSync('style.json', 'utf8'))
 
 console.log(boxen(chalk.green("Welcome to the GAB Client!"), {padding: 1}))
 
@@ -43,6 +35,7 @@ port = readlineSync.question("Enter server port: ")
 
 serverAddress = "ws://" + ip + ":" + port + "/?username=" + username
 
+//Connecting to the Websocket
 webSocket = new WebSocket(serverAddress)
 
 //Sets up readline interface for use later
@@ -149,8 +142,10 @@ webSocket.onopen = () => {
         } 
     })
 
+    //Things that the Client should do when it recieves a message from the server
     webSocket.onmessage = msg => {
         let backMessage = JSON.parse(msg.data);
+        //If its a direct message the Client has special formatting for how it displays the message
         if(backMessage.kind === "direct")
         {
             if(typeof backMessage.data === "string")
@@ -165,6 +160,8 @@ webSocket.onopen = () => {
                 console.log(`(Whisper From ${backMessage.from}): ${backMessage.data}`)
             }
         }
+        //If the message if from the GABServer it is either an error or a server wide message
+        //the message is highlighted in red or blue respectively
         else if(backMessage.from === "GABServer")
         {
             if(backMessage.kind === "error")
@@ -183,14 +180,19 @@ webSocket.onopen = () => {
                 readLine.prompt(true)
             }
         }
+        //Else the message is a normal message and should be printed to the console with some conditions
         else
         {
+            //If the message is not of type string the message should just be printed to the console without
+            //using the string formatting functions, as using these functions on non-strings will crash the Client
+            //Stops junk being sent from the server from crashing the client
             if(typeof backMessage.data !== "string")
             {
                 readline.cursorTo(process.stdout, 0)
                 console.log(backMessage.data)
                 readLine.prompt(true) 
             }
+            //Else formats the string using emoteCheck and styleString functions that make use of the JSONs
             else
             {
                 messageString = "[" + backMessage.from + ']: ' + functions.styleString(functions.emoteCheck(backMessage.data))
