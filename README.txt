@@ -9,6 +9,10 @@ Steps to connect:
 5. You should now be connected to the server. A box with avaiable commands will be displayed.
 6. To send messages just type your message and press enter.
 
+Modifying the style.json file:
+To change different text colors you can modify the words and colors/styles of the style.json file.
+Please reference this link for avaiable styles: https://github.com/chalk/chalk
+
 BotIt:
 The primary additional feature of this client is a Bot called bot it.
 To make BotIt join the server you simply have to type the command \b, then Bot it will join.
