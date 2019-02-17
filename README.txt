@@ -36,3 +36,11 @@ over other messages. This works the majority of the time, but certain length mes
 4. Resizing the terminal will cause messages above your current position to look odd due to the padding. All messages recieved
 and sent after this will not have any due to the scaling I do with the padding and such in the program. But I could not make the 
 messages above adapt to the terminal size changing in the current iteration of the client.
+
+Additional Packages you need:
+chalk
+readline
+readlineSync
+Boxen
+wcwidth
+fs
